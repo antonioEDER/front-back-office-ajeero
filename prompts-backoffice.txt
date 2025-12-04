@@ -1,0 +1,950 @@
+PROMPT PARA FRONTEND DO BACKOFFICE (ADMIN) - QUASARJS
+====================================================
+
+Crie um painel administrativo web completo para gestão do sistema AJEERO usando Quasar Framework (Vue 3 + JS).
+
+O frontend deve consumir a API REST já desenvolvida em Go/Fiber, seguindo os padrões e endpoints documentados abaixo.
+
+Este é o painel de ADMINISTRAÇÃO, diferente do app do associado.
+
+====================================================
+TECNOLOGIAS E FERRAMENTAS
+====================================================
+
+- Quasar Framework v2+ (Vue 3 + Composition API)
+- JS
+- Pinia (Gerenciamento de estado)
+- Axios (HTTP Client)
+- Vue Router
+- Quasar Icon Set (Material Icons)
+- Quasar Components (QTable, QForm, QInput, QSelect, QEditor, etc.)
+- Chart.js ou ApexCharts (para gráficos do dashboard)
+- Vue3-Toastify ou Quasar Notify (notificações)
+
+====================================================
+ESTRUTURA DE PASTAS
+====================================================
+
+src/
+├── boot/
+│   ├── axios.js          # Configuração do Axios
+│   ├── auth.js           # Interceptor de autenticação
+│   └── router.js         # Guards de rota
+├── components/
+│   ├── common/           # Componentes reutilizáveis
+│   │   ├── AppHeader.vue
+│   │   ├── AppSidebar.vue
+│   │   ├── DataTable.vue
+│   │   ├── SearchBar.vue
+│   │   ├── StatusBadge.vue
+│   │   └── ConfirmDialog.vue
+│   ├── dashboard/
+│   │   ├── StatCard.vue
+│   │   ├── ChartCard.vue
+│   │   └── RecentActivity.vue
+│   ├── associado/
+│   │   ├── AssociadoForm.vue
+│   │   ├── AssociadoTable.vue
+│   │   └── PhotoUpload.vue
+│   ├── curso/
+│   │   ├── CourseForm.vue
+│   │   ├── LessonForm.vue
+│   │   └── CourseTable.vue
+│   └── evento/
+│       ├── EventForm.vue
+│       └── EventTable.vue
+├── layouts/
+│   └── AdminLayout.vue   # Layout principal com sidebar
+├── pages/
+│   ├── auth/
+│   │   └── LoginPage.vue
+│   ├── dashboard/
+│   │   └── DashboardPage.vue
+│   ├── associados/
+│   │   ├── AssociadosListPage.vue
+│   │   ├── AssociadoCreatePage.vue
+│   │   └── AssociadoEditPage.vue
+│   ├── cursos/
+│   │   ├── CoursesListPage.vue
+│   │   ├── CourseCreatePage.vue
+│   │   ├── CourseEditPage.vue
+│   │   └── LessonsManagePage.vue
+│   ├── eventos/
+│   │   ├── EventsListPage.vue
+│   │   ├── EventCreatePage.vue
+│   │   ├── EventEditPage.vue
+│   │   └── EventInscritosPage.vue
+│   ├── parceiros/
+│   │   ├── PartnersListPage.vue
+│   │   ├── PartnerCreatePage.vue
+│   │   ├── PartnerEditPage.vue
+│   │   └── BenefitsManagePage.vue
+│   ├── noticias/
+│   │   ├── NewsListPage.vue
+│   │   ├── NewsCreatePage.vue
+│   │   └── NewsEditPage.vue
+│   └── notificacoes/
+│       ├── NotificationsListPage.vue
+│       └── NotificationCreatePage.vue
+├── stores/
+│   ├── auth.js           # Store de autenticação
+│   ├── dashboard.js      # Store do dashboard
+│   ├── associado.js      # Store de associados
+│   ├── curso.js          # Store de cursos
+│   ├── evento.js         # Store de eventos
+│   ├── parceiro.js       # Store de parceiros
+│   ├── noticia.js        # Store de notícias
+│   └── notificacao.js    # Store de notificações
+├── services/
+│   ├── api.js            # Cliente Axios configurado
+│   ├── auth.service.js
+│   ├── dashboard.service.js
+│   ├── associado.service.js
+│   ├── curso.service.js
+│   ├── evento.service.js
+│   ├── parceiro.service.js
+│   ├── noticia.service.js
+│   └── notificacao.service.js
+├── types/
+│   ├── auth.types.js
+│   ├── associado.types.js
+│   ├── curso.types.js
+│   └── api.types.js
+├── utils/
+│   ├── formatters.js     # Formatação de datas, valores
+│   ├── validators.js     # Validações de formulários
+│   ├── constants.js      # Constantes da aplicação
+│   └── tableHelpers.js   # Helpers para tabelas
+└── router/
+    └── routes.js         # Definição de rotas
+
+====================================================
+ENDPOINTS DA API (BASE URL: /api/v1)
+====================================================
+
+AUTENTICAÇÃO:
+- POST /auth/login
+  Body: { email, password }
+  Response: { access_token, refresh_token, user }
+
+- POST /auth/refresh
+  Body: { refresh_token }
+  Response: { access_token }
+
+DASHBOARD (Admin):
+- GET /admin/dashboard
+  Response: {
+    total_associados,
+    total_eventos,
+    total_inscritos,
+    total_cursos,
+    total_cursos_acessados,
+    total_parceiros,
+    total_noticias
+  }
+
+ASSOCIADOS (Admin):
+- GET /associados (com paginação: ?page=1&limit=20&sort=-created_at)
+- GET /associados/:id
+- POST /associados
+  Body: { name, cpf, email, password, phone, address }
+  IMPORTANTE: Ao criar associado, também cria automaticamente um registro na tabela users
+- PUT /associados/:id
+- DELETE /admin/associados/:id
+- PATCH /associados/:id/activate
+- PATCH /associados/:id/deactivate
+- POST /associados/:id/photo
+
+CURSOS (Admin):
+- GET /courses (listar todos)
+- GET /courses/:id
+- POST /admin/courses
+- PUT /admin/courses/:id
+- DELETE /admin/courses/:id
+- POST /admin/courses/lessons
+- PUT /admin/courses/lessons/:id
+- DELETE /admin/courses/lessons/:id
+
+EVENTOS (Admin):
+- GET /eventos (listar todos)
+- GET /eventos/:id
+- POST /admin/eventos
+- PUT /admin/eventos/:id
+- DELETE /admin/eventos/:id
+- GET /admin/eventos/:id/inscritos
+
+PARCEIROS (Admin):
+- GET /admin/parceiros (com paginação)
+- GET /admin/parceiros/:id
+- POST /admin/parceiros
+- PUT /admin/parceiros/:id
+- DELETE /admin/parceiros/:id
+
+BENEFÍCIOS (Admin):
+- GET /admin/beneficios (com paginação)
+- GET /admin/beneficios/:id
+- GET /admin/beneficios/parceiro/:parceiro_id
+- POST /admin/beneficios
+- PUT /admin/beneficios/:id
+- DELETE /admin/beneficios/:id
+
+NOTÍCIAS (Admin):
+- GET /noticias (listar todas)
+- GET /noticias/:id
+- POST /admin/noticias
+- PUT /admin/noticias/:id
+- DELETE /admin/noticias/:id
+
+NOTIFICAÇÕES (Admin):
+- GET /admin/notificacoes (com paginação)
+- POST /admin/notificacoes
+  Body: { titulo, mensagem, associado_id (opcional) }
+
+====================================================
+PÁGINAS E FUNCIONALIDADES
+====================================================
+
+1. LOGIN PAGE
+   - Campos: Email e Senha
+   - Botão "Entrar"
+   - Validação de formulário
+   - Loading durante autenticação
+   - Mensagens de erro
+   - Salvar tokens no storage
+   - Redirecionar para Dashboard após login
+   - Design profissional e limpo
+
+2. DASHBOARD PAGE
+   - Cards de estatísticas:
+     * Total de Associados
+     * Total de Eventos
+     * Total de Inscritos
+     * Total de Cursos
+     * Total de Cursos Acessados
+     * Total de Parceiros
+     * Total de Notícias
+   - Gráficos (opcional):
+     * Associados por mês
+     * Eventos por mês
+     * Cursos mais acessados
+   - Tabela de atividades recentes
+   - Links rápidos para principais seções
+   - Atualização automática a cada X minutos
+
+3. ASSOCIADOS - LISTA PAGE
+   - Tabela com colunas:
+     * Foto (thumbnail)
+     * Nome
+     * CPF
+     * Email
+     * Telefone
+     * Status (Badge)
+     * Data de cadastro
+     * Ações (Editar, Ativar/Desativar, Deletar)
+   - Filtros:
+     * Por status (Ativo/Inativo)
+     * Por nome/CPF/Email (busca)
+   - Paginação
+   - Ordenação por colunas
+   - Botão "Novo Associado"
+   - Exportar para CSV/Excel (opcional)
+   - Ações em lote (ativar/desativar múltiplos)
+   - OBSERVAÇÃO: Cada associado está vinculado a um user (tabela users)
+     * Ao ativar/desativar associado, o status do user também é atualizado
+     * Ao deletar associado, o user vinculado também é removido (CASCADE)
+
+4. ASSOCIADOS - CRIAR/EDITAR PAGE
+   - Formulário completo:
+     * Nome (obrigatório)
+     * CPF (obrigatório, com máscara e validação)
+     * Email (obrigatório, validação)
+     * Senha (obrigatório apenas na criação, mínimo 6 caracteres)
+       - Campo de senha com confirmação
+       - Mostrar/ocultar senha
+       - Validação de força da senha (opcional)
+     * Telefone (com máscara)
+     * Endereço:
+       - Rua
+       - Número
+       - Complemento
+       - Bairro
+       - Cidade
+       - Estado (select)
+       - CEP (com máscara e busca automática)
+     * Status (Ativo/Inativo)
+   - Upload de foto de perfil
+   - Preview da foto
+   - Validação de todos os campos
+   - Botão "Salvar" e "Cancelar"
+   - Mensagens de sucesso/erro
+   - IMPORTANTE: Ao criar associado, o sistema cria automaticamente:
+     * Um registro na tabela users com mesmo nome, CPF, email
+     * Senha fornecida (hash bcrypt)
+     * Role: 'user'
+     * Status: 'active'
+     * O associado fica vinculado ao user através do campo user_id
+   - Ao editar associado:
+     * Nome e email são sincronizados automaticamente com o user vinculado
+     * Status é sincronizado com o user vinculado
+     * Senha NÃO é editável (criar endpoint separado se necessário)
+
+5. CURSOS - LISTA PAGE
+   - Tabela com colunas:
+     * Thumbnail
+     * Título
+     * Descrição (resumida)
+     * Total de aulas
+     * Data de criação
+     * Ações (Editar, Gerenciar Aulas, Deletar)
+   - Filtros:
+     * Por título (busca)
+   - Paginação
+   - Botão "Novo Curso"
+   - Ordenação
+
+6. CURSOS - CRIAR/EDITAR PAGE
+   - Formulário:
+     * Título (obrigatório)
+     * Descrição (editor WYSIWYG)
+     * Capa (upload de imagem)
+     * Thumbnail (upload de imagem)
+   - Validação
+   - Preview da capa
+   - Botão "Salvar" e "Cancelar"
+
+7. CURSOS - GERENCIAR AULAS PAGE
+   - Lista de aulas do curso
+   - Ordenação por drag-and-drop ou campo numérico
+   - Para cada aula:
+     * Título
+     * Descrição
+     * Link YouTube
+     * Ordem
+     * Ações (Editar, Deletar, Mover)
+   - Botão "Nova Aula"
+   - Modal/Formulário para criar/editar aula:
+     * Título (obrigatório)
+     * Descrição
+     * Link YouTube (obrigatório, validação de URL)
+     * Ordem (número)
+
+8. EVENTOS - LISTA PAGE
+   - Tabela com colunas:
+     * Capa (thumbnail)
+     * Título
+     * Data/Hora
+     * Local
+     * Total de inscritos
+     * Data de criação
+     * Ações (Editar, Ver Inscritos, Deletar)
+   - Filtros:
+     * Por data (futuros/passados)
+     * Por título (busca)
+   - Paginação
+   - Botão "Novo Evento"
+   - Ordenação
+
+9. EVENTOS - CRIAR/EDITAR PAGE
+   - Formulário:
+     * Título (obrigatório)
+     * Descrição (editor WYSIWYG)
+     * Data/Hora (datepicker e timepicker)
+     * Local (obrigatório)
+     * Capa (upload de imagem)
+   - Validação
+   - Preview da capa
+   - Botão "Salvar" e "Cancelar"
+
+10. EVENTOS - INSCRITOS PAGE
+    - Lista de associados inscritos no evento
+    - Tabela com:
+      * Foto
+      * Nome
+      * CPF
+      * Email
+      * Data de inscrição
+    - Busca por nome/CPF/Email
+    - Exportar lista (CSV/Excel)
+    - Paginação
+
+11. PARCEIROS - LISTA PAGE
+    - Tabela com colunas:
+      * Logo (thumbnail)
+      * Nome
+      * Descrição (resumida)
+      * Total de benefícios
+      * Data de criação
+      * Ações (Editar, Gerenciar Benefícios, Deletar)
+    - Filtros:
+      * Por nome (busca)
+    - Paginação
+    - Botão "Novo Parceiro"
+    - Ordenação
+
+12. PARCEIROS - CRIAR/EDITAR PAGE
+    - Formulário:
+      * Nome (obrigatório)
+      * Descrição (editor WYSIWYG)
+      * Logo (upload de imagem)
+    - Validação
+    - Preview do logo
+    - Botão "Salvar" e "Cancelar"
+
+13. PARCEIROS - GERENCIAR BENEFÍCIOS PAGE
+    - Lista de benefícios do parceiro
+    - Tabela com:
+      * Título
+      * Tipo (Cupom, Desconto, Saúde)
+      * Descrição
+      * Regra de uso
+      * Ações (Editar, Deletar)
+    - Botão "Novo Benefício"
+    - Modal/Formulário para criar/editar benefício:
+      * Título (obrigatório)
+      * Descrição
+      * Tipo (select: Cupom, Desconto, Saúde)
+      * Regra de uso (textarea)
+
+14. NOTÍCIAS - LISTA PAGE
+    - Tabela com colunas:
+      * Imagem (thumbnail)
+      * Título
+      * Data de publicação
+      * Ações (Editar, Deletar, Visualizar)
+    - Filtros:
+      * Por título (busca)
+      * Por data
+    - Paginação
+    - Botão "Nova Notícia"
+    - Ordenação
+
+15. NOTÍCIAS - CRIAR/EDITAR PAGE
+    - Formulário:
+      * Título (obrigatório)
+      * Conteúdo HTML (editor WYSIWYG - Quasar QEditor)
+      * Imagem (upload)
+    - Preview do conteúdo
+    - Validação
+    - Botão "Salvar" e "Cancelar"
+    - Botão "Publicar" (salvar e marcar como publicado)
+
+16. NOTIFICAÇÕES - LISTA PAGE
+    - Tabela com colunas:
+      * Título
+      * Mensagem (resumida)
+      * Destinatário (Todos ou nome do associado)
+      * Data de envio
+      * Ações (Visualizar, Deletar)
+    - Filtros:
+      * Por destinatário
+      * Por data
+    - Paginação
+    - Botão "Nova Notificação"
+
+17. NOTIFICAÇÕES - CRIAR PAGE
+    - Formulário:
+      * Título (obrigatório)
+      * Mensagem (obrigatório, textarea)
+      * Destinatário:
+        - Radio: "Todos os associados" ou "Associado específico"
+        - Se específico: Select com busca de associado
+    - Preview da notificação
+    - Validação
+    - Botão "Enviar Notificação"
+    - Confirmação antes de enviar
+
+====================================================
+COMPONENTES REUTILIZÁVEIS
+====================================================
+
+1. AppHeader
+   - Logo AJEERO
+   - Título da página atual
+   - Menu de usuário (logout)
+   - Notificações (badge)
+
+2. AppSidebar
+   - Menu lateral com todas as seções:
+     * Dashboard
+     * Associados
+     * Cursos
+     * Eventos
+     * Parceiros
+     * Notícias
+     * Notificações
+   - Ícones
+   - Indicador de página ativa
+   - Colapsável
+
+3. DataTable
+   - Tabela reutilizável com:
+     * Paginação
+     * Ordenação
+     * Busca
+     * Filtros
+     * Ações em lote
+     * Exportação
+
+4. SearchBar
+   - Barra de busca com debounce
+   - Ícone de busca
+   - Botão limpar
+
+5. StatusBadge
+   - Badge de status (Ativo/Inativo)
+   - Cores diferentes por status
+
+6. ConfirmDialog
+   - Modal de confirmação
+   - Personalizável (título, mensagem, botões)
+
+7. StatCard
+   - Card de estatística
+   - Ícone
+   - Valor
+   - Label
+   - Cor customizável
+
+8. ChartCard
+   - Card com gráfico
+   - Título
+   - Gráfico (Chart.js ou ApexCharts)
+
+====================================================
+STORES (PINIA)
+====================================================
+
+1. Auth Store
+   - state: user, token, refreshToken, isAuthenticated
+   - actions: login, logout, refreshToken, checkAuth
+   - getters: userInfo, isAdmin
+
+2. Dashboard Store
+   - state: stats, loading
+   - actions: fetchStats
+   - getters: formattedStats
+
+3. Associado Store
+   - state: associados, currentAssociado, loading, pagination
+   - actions: fetchAssociados, fetchById, create, update, delete, activate, deactivate
+   - getters: activeAssociados, inactiveAssociados
+   - OBSERVAÇÃO: Ao criar associado, o sistema cria automaticamente o user vinculado
+     * A resposta inclui o user_id do associado
+     * Ativar/desativar sincroniza status com user
+
+4. Curso Store
+   - state: courses, currentCourse, lessons, loading, pagination
+   - actions: fetchCourses, fetchById, create, update, delete, createLesson, updateLesson, deleteLesson
+   - getters: coursesWithLessons
+
+5. Evento Store
+   - state: eventos, currentEvento, inscritos, loading, pagination
+   - actions: fetchEventos, fetchById, create, update, delete, fetchInscritos
+   - getters: upcomingEventos, pastEventos
+
+6. Parceiro Store
+   - state: parceiros, currentParceiro, beneficios, loading, pagination
+   - actions: fetchParceiros, fetchById, create, update, delete, fetchBeneficios, createBeneficio, updateBeneficio, deleteBeneficio
+   - getters: parceirosWithBenefits
+
+7. Noticia Store
+   - state: noticias, currentNoticia, loading, pagination
+   - actions: fetchNoticias, fetchById, create, update, delete
+   - getters: latestNoticias
+
+8. Notificacao Store
+   - state: notificacoes, loading, pagination
+   - actions: fetchNotificacoes, create
+   - getters: recentNotificacoes
+
+====================================================
+SERVICES (API)
+====================================================
+
+Criar services para cada módulo seguindo o padrão:
+
+```javascript
+// Exemplo: associado.service.js
+import api from './api'
+
+export const associadoService = {
+  async getAssociados(params) {
+    return api.get('/associados', { params })
+  },
+  
+  async getAssociadoById(id) {
+    return api.get(`/associados/${id}`)
+  },
+  
+  // IMPORTANTE: Ao criar associado, também cria user automaticamente
+  // Body deve incluir: { name, cpf, email, password, phone, address }
+  async createAssociado(data) {
+    return api.post('/associados', data)
+    // Resposta inclui user_id do associado criado
+  },
+  
+  // Ao atualizar, nome e email são sincronizados com user vinculado
+  async updateAssociado(id, data) {
+    return api.put(`/associados/${id}`, data)
+  },
+  
+  async deleteAssociado(id) {
+    return api.delete(`/admin/associados/${id}`)
+    // Remove também o user vinculado (CASCADE)
+  },
+  
+  // Ativa associado e user vinculado
+  async activateAssociado(id) {
+    return api.patch(`/associados/${id}/activate`)
+  },
+  
+  // Desativa associado e user vinculado
+  async deactivateAssociado(id) {
+    return api.patch(`/associados/${id}/deactivate`)
+  },
+  
+  async uploadPhoto(id, file) {
+    const formData = new FormData()
+    formData.append('photo', file)
+    return api.post(`/associados/${id}/photo`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  }
+}
+```
+
+====================================================
+ROTAS
+====================================================
+
+/auth
+  - /login
+
+/dashboard
+  - / (index)
+
+/associados
+  - / (lista)
+  - /novo (criar)
+  - /:id (editar)
+
+/cursos
+  - / (lista)
+  - /novo (criar)
+  - /:id (editar)
+  - /:id/aulas (gerenciar aulas)
+
+/eventos
+  - / (lista)
+  - /novo (criar)
+  - /:id (editar)
+  - /:id/inscritos
+
+/parceiros
+  - / (lista)
+  - /novo (criar)
+  - /:id (editar)
+  - /:id/beneficios
+
+/noticias
+  - / (lista)
+  - /novo (criar)
+  - /:id (editar)
+
+/notificacoes
+  - / (lista)
+  - /nova (criar)
+
+====================================================
+REQUISITOS TÉCNICOS
+====================================================
+
+1. AUTENTICAÇÃO
+   - Interceptor Axios para adicionar token em todas as requisições
+   - Refresh token automático quando token expirar
+   - Guard de rota para proteger páginas (apenas admin)
+   - Logout automático em caso de 401
+   - Verificação de role admin
+
+2. GERENCIAMENTO DE ESTADO
+   - Pinia para estado global
+   - Persistência de auth no localStorage
+   - Cache de dados quando apropriado
+
+3. VALIDAÇÃO
+   - Validação de formulários com regras
+   - Mensagens de erro amigáveis
+   - Feedback visual de campos inválidos
+   - Validação de CPF, CEP, Email, etc.
+
+4. TABELAS
+   - QTable do Quasar
+   - Paginação server-side
+   - Ordenação por colunas
+   - Filtros avançados
+   - Seleção múltipla
+   - Ações em lote
+   - Exportação (CSV/Excel)
+
+5. FORMULÁRIOS
+   - QForm do Quasar
+   - Validação em tempo real
+   - Máscaras de input (CPF, CEP, telefone)
+   - Upload de imagens
+   - Editor WYSIWYG para conteúdo HTML
+   - Date/Time pickers
+
+6. NOTIFICAÇÕES
+   - Quasar Notify para feedback
+   - Toasts de sucesso/erro
+   - Confirmações antes de ações destrutivas
+
+7. UPLOAD DE ARQUIVOS
+   - Upload de imagens (fotos, capas, logos)
+   - Preview antes de enviar
+   - Compressão de imagem (opcional)
+   - Validação de tipo e tamanho
+
+8. EDITOR WYSIWYG
+   - Quasar QEditor ou similar
+   - Formatação de texto
+   - Inserção de imagens
+   - Preview do conteúdo
+
+9. GRÁFICOS
+   - Chart.js ou ApexCharts
+   - Gráficos no dashboard
+   - Responsivos
+
+10. PERFORMANCE
+    - Lazy loading de rotas
+    - Lazy loading de imagens
+    - Debounce em buscas
+    - Virtual scrolling em tabelas grandes
+    - Cache de requisições
+
+11. UX/UI
+    - Design profissional e limpo
+    - Feedback visual em ações
+    - Loading states
+    - Empty states
+    - Error states
+    - Animações suaves
+    - Responsivo (desktop-first, mas adaptável)
+
+12. ACESSIBILIDADE
+    - Labels adequados
+    - Contraste de cores
+    - Navegação por teclado
+    - ARIA labels
+
+====================================================
+TEMA E DESIGN
+====================================================
+
+- Design profissional de painel administrativo
+- Cores principais da marca AJEERO
+- Tema Quasar customizado
+- Modo claro (padrão)
+- Modo escuro (opcional)
+- Ícones Material Icons
+- Tipografia clara e legível
+- Espaçamento consistente
+- Cards com sombras suaves
+- Tabelas bem estruturadas
+- Formulários organizados
+
+====================================================
+FLUXO DE NAVEGAÇÃO PRINCIPAL
+====================================================
+
+1. App inicia → Verifica token → Login ou Dashboard
+
+2. Login → Autentica → Salva token → Dashboard
+
+3. Dashboard → Cards clicáveis → Navega para seções
+
+4. Sidebar → Menu → Navega para qualquer seção
+
+5. Lista → Botão "Novo" → Formulário de criação → Salvar → Volta para lista
+
+6. Lista → Ação "Editar" → Formulário de edição → Salvar → Volta para lista
+
+7. Lista → Ação "Deletar" → Confirmação → Deleta → Atualiza lista
+
+8. Evento → "Ver Inscritos" → Lista de inscritos → Exportar
+
+9. Parceiro → "Gerenciar Benefícios" → Lista de benefícios → Criar/Editar/Deletar
+
+10. Curso → "Gerenciar Aulas" → Lista de aulas → Criar/Editar/Deletar → Reordenar
+
+====================================================
+INTEGRAÇÃO COM API
+====================================================
+
+- Base URL configurável (dev/prod)
+- Timeout de requisições
+- Retry automático em falhas de rede
+- Tratamento de erros padronizado
+- Loading global durante requisições
+- Mensagens de erro amigáveis
+- Validação de respostas
+
+====================================================
+VALIDAÇÕES ESPECÍFICAS
+====================================================
+
+1. CPF
+   - Máscara: 000.000.000-00
+   - Validação de dígitos verificadores
+
+2. CEP
+   - Máscara: 00000-000
+   - Busca automática de endereço (via API externa)
+
+3. Email
+   - Validação de formato
+   - Verificação de unicidade (opcional)
+
+4. Telefone
+   - Máscara: (00) 00000-0000
+   - Aceitar diferentes formatos
+
+5. URL (YouTube)
+   - Validação de formato
+   - Extração de ID do vídeo
+
+6. Imagens
+   - Tipos permitidos: JPG, PNG, GIF
+   - Tamanho máximo: 10MB
+   - Dimensões recomendadas
+
+====================================================
+FUNCIONALIDADES ESPECIAIS
+====================================================
+
+1. DRAG AND DROP
+   - Reordenar aulas de curso
+   - Usar vue-draggable ou similar
+
+2. BUSCA DE CEP
+   - Integração com API ViaCEP ou similar
+   - Preencher endereço automaticamente
+
+3. EXPORTAÇÃO
+   - Exportar listas para CSV/Excel
+   - Usar biblioteca como xlsx ou csv-export
+
+4. IMPORTAÇÃO (OPCIONAL)
+   - Importar associados via CSV
+   - Validação de dados
+   - Preview antes de importar
+
+5. FILTROS AVANÇADOS
+   - Múltiplos filtros simultâneos
+   - Salvar filtros favoritos
+   - Reset de filtros
+
+6. AÇÕES EM LOTE
+   - Selecionar múltiplos itens
+   - Ações: Ativar, Desativar, Deletar
+   - Confirmação antes de executar
+
+====================================================
+BUILD E DEPLOY
+====================================================
+
+- Quasar CLI para desenvolvimento
+- Build para SPA (web)
+- Variáveis de ambiente para API URL
+- Versionamento de app
+- Deploy em servidor web (nginx, apache)
+
+====================================================
+TESTES (OPCIONAL MAS RECOMENDADO)
+====================================================
+
+- Testes unitários de stores
+- Testes de componentes críticos
+- Testes E2E das principais funcionalidades
+
+====================================================
+DOCUMENTAÇÃO
+====================================================
+
+- README.md com instruções de setup
+- Comentários no código
+- Documentação de componentes
+- Guia de contribuição
+
+====================================================
+ENTREGÁVEIS ESPERADOS
+====================================================
+
+1. Projeto Quasar completo e funcional
+2. Todas as páginas implementadas
+3. Integração completa com a API
+4. Autenticação funcionando
+5. CRUD completo de todos os módulos
+6. Dashboard com estatísticas
+7. Tabelas com paginação, ordenação e filtros
+8. Formulários validados
+9. Upload de imagens funcionando
+10. Editor WYSIWYG para conteúdo HTML
+11. Design responsivo e profissional
+12. Tratamento de erros
+13. Loading states
+14. Documentação básica
+15. Build funcionando
+
+====================================================
+OBSERVAÇÕES IMPORTANTES
+====================================================
+
+- Este é o frontend do BACKOFFICE (admin), diferente do app do associado
+- Todas as rotas da API requerem autenticação
+- Apenas usuários com role "admin" podem acessar
+- O token JWT deve ser enviado no header Authorization: Bearer {token}
+- Implementar refresh token automático
+- Todas as rotas admin começam com /admin/
+- Seguir padrões do Quasar Framework
+- Usar Composition API do Vue 3
+- Código limpo e bem organizado
+- Design profissional de painel administrativo
+- Focar em usabilidade e produtividade
+- Tabelas devem ser eficientes mesmo com muitos dados
+- Formulários devem ser intuitivos e validados
+
+====================================================
+VÍNCULO USUÁRIO E ASSOCIADO
+====================================================
+
+IMPORTANTE: Cada associado está vinculado a um usuário (tabela users).
+
+Ao criar um associado:
+- O sistema cria automaticamente um registro na tabela users
+- O user criado tem: mesmo nome, CPF, email do associado
+- Senha fornecida no formulário (hash bcrypt)
+- Role: 'user'
+- Status: 'active'
+- O associado fica vinculado através do campo user_id (FK)
+
+Ao editar associado:
+- Nome e email são sincronizados automaticamente com o user vinculado
+- Status é sincronizado com o user vinculado
+- Senha NÃO é editável no formulário de edição (criar endpoint separado se necessário)
+
+Ao ativar/desativar associado:
+- O status do user vinculado também é atualizado automaticamente
+
+Ao deletar associado:
+- O user vinculado também é removido (CASCADE)
+
+Formulário de criação deve incluir:
+- Campo de senha (obrigatório, mínimo 6 caracteres)
+- Campo de confirmação de senha
+- Validação de senhas iguais
+
+Resposta da API inclui:
+- user_id: ID do user vinculado ao associado
+

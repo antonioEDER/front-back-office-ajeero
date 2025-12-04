@@ -1,0 +1,44 @@
+import api from './api'
+
+export const cursoService = {
+  async getCourses(params) {
+    const response = await api.get('/courses', { params })
+    return response.data
+  },
+
+  async getCourseById(id) {
+    const response = await api.get(`/courses/${id}`)
+    return response.data
+  },
+
+  async createCourse(data) {
+    const response = await api.post('/admin/courses', data)
+    return response.data
+  },
+
+  async updateCourse(id, data) {
+    const response = await api.put(`/admin/courses/${id}`, data)
+    return response.data
+  },
+
+  async deleteCourse(id) {
+    const response = await api.delete(`/admin/courses/${id}`)
+    return response.data
+  },
+
+  async createLesson(data) {
+    const response = await api.post('/admin/courses/lessons', data)
+    return response.data
+  },
+
+  async updateLesson(id, data) {
+    const response = await api.put(`/admin/courses/lessons/${id}`, data)
+    return response.data
+  },
+
+  async deleteLesson(id) {
+    const response = await api.delete(`/admin/courses/lessons/${id}`)
+    return response.data
+  }
+}
+
