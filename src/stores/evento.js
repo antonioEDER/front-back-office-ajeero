@@ -31,14 +31,23 @@ export const useEventoStore = defineStore('evento', {
       this.loading = true
       try {
         const response = await eventoService.getEventos(params)
-        this.eventos = response.data || response
-        if (response.pagination) {
-          this.pagination = {
-            page: response.pagination.page || 1,
-            rowsPerPage: response.pagination.limit || 20,
-            rowsNumber: response.pagination.total || 0
+        
+        // A resposta pode ser um array direto ou um objeto com data e pagination
+        if (Array.isArray(response)) {
+          this.eventos = response
+        } else if (response?.data && Array.isArray(response.data)) {
+          this.eventos = response.data
+          if (response.pagination) {
+            this.pagination = {
+              page: response.pagination.page || 1,
+              rowsPerPage: response.pagination.limit || 20,
+              rowsNumber: response.pagination.total || 0
+            }
           }
+        } else {
+          this.eventos = []
         }
+        
         return { success: true }
       } catch (error) {
         console.error('Erro ao buscar eventos:', error)
@@ -135,14 +144,23 @@ export const useEventoStore = defineStore('evento', {
       this.loading = true
       try {
         const response = await eventoService.getInscritos(eventoId, params)
-        this.inscritos = response.data || response
-        if (response.pagination) {
-          this.pagination = {
-            page: response.pagination.page || 1,
-            rowsPerPage: response.pagination.limit || 20,
-            rowsNumber: response.pagination.total || 0
+        
+        // A resposta pode ser um array direto ou um objeto com data e pagination
+        if (Array.isArray(response)) {
+          this.inscritos = response
+        } else if (response?.data && Array.isArray(response.data)) {
+          this.inscritos = response.data
+          if (response.pagination) {
+            this.pagination = {
+              page: response.pagination.page || 1,
+              rowsPerPage: response.pagination.limit || 20,
+              rowsNumber: response.pagination.total || 0
+            }
           }
+        } else {
+          this.inscritos = []
         }
+        
         return { success: true }
       } catch (error) {
         console.error('Erro ao buscar inscritos:', error)

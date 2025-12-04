@@ -43,7 +43,14 @@ api.interceptors.response.use(
             refresh_token: refreshToken
           })
 
-          const { access_token } = response.data
+          // A resposta pode ter a estrutura: { success, message, data: { access_token } }
+          const responseData = response.data
+          const access_token = responseData.data?.access_token || responseData.access_token
+          
+          if (!access_token) {
+            throw new Error('Token de acesso não encontrado na resposta do refresh')
+          }
+
           localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, access_token)
 
           originalRequest.headers.Authorization = `Bearer ${access_token}`

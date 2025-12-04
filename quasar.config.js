@@ -51,7 +51,9 @@ export default defineConfig((/* ctx */) => {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:3000/api/v1'
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

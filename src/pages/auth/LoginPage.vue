@@ -70,8 +70,8 @@ import { validateEmail } from 'src/utils/validators'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const email = ref('')
-const password = ref('')
+const email = ref('admin@ajeero.com')
+const password = ref('admin123')
 const showPassword = ref(false)
 const loading = ref(false)
 
@@ -88,7 +88,12 @@ const handleLogin = async () => {
     const result = await authStore.login(email.value, password.value)
     if (result.success) {
       router.push('/dashboard')
+    } else {
+      // Erro já foi tratado no store com Notify
+      console.error('Login falhou:', result.error)
     }
+  } catch (error) {
+    console.error('Erro inesperado no login:', error)
   } finally {
     loading.value = false
   }

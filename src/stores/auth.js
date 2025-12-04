@@ -20,7 +20,25 @@ export const useAuthStore = defineStore('auth', {
     async login(email, password) {
       try {
         const response = await authService.login(email, password)
-        const { access_token, refresh_token, user } = response
+
+        // A resposta vem no formato: { success, message, data: { access_token, refresh_token, user } }
+        const responseData = response
+
+        // Verifica se a resposta tem a estrutura esperada
+        if (!responseData) {
+          throw new Error(responseData.message || 'Login falhou')
+        }
+
+        // Acessa os dados dentro de data
+        const { access_token, refresh_token, user } = responseData.data || {}
+
+        if (!access_token) {
+          throw new Error('Token de acesso não encontrado na resposta')
+        }
+
+        if (!user) {
+          throw new Error('Dados do usuário não encontrados na resposta')
+        }
 
         this.token = access_token
         this.refreshToken = refresh_token
@@ -29,12 +47,21 @@ export const useAuthStore = defineStore('auth', {
 
         // Salva no localStorage
         localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, access_token)
-        localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refresh_token)
+        if (refresh_token) {
+          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refresh_token)
+        }
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user))
+
+        Notify.create({
+          type: 'positive',
+          message: responseData.message || 'Login realizado com sucesso!',
+          position: 'top'
+        })
 
         return { success: true }
       } catch (error) {
-        const message = error.response?.data?.message || 'Erro ao fazer login'
+        console.error('Erro no login:', error)
+        const message = error.response?.data?.message || error.message || 'Erro ao fazer login'
         Notify.create({
           type: 'negative',
           message,
@@ -49,17 +76,24 @@ export const useAuthStore = defineStore('auth', {
         const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
         if (!refreshToken) {
           this.logout()
-          return
+          return { success: false }
         }
 
         const response = await authService.refreshToken(refreshToken)
-        const { access_token } = response
+
+        // A resposta pode ter a estrutura: { success, message, data: { access_token } }
+        const access_token = response.access_token || response.data?.access_token
+
+        if (!access_token) {
+          throw new Error('Token de acesso não encontrado na resposta do refresh')
+        }
 
         this.token = access_token
         localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, access_token)
 
         return { success: true }
       } catch (error) {
+        console.error('Erro ao renovar token:', error)
         this.logout()
         return { success: false }
       }

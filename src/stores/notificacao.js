@@ -26,14 +26,23 @@ export const useNotificacaoStore = defineStore('notificacao', {
       this.loading = true
       try {
         const response = await notificacaoService.getNotificacoes(params)
-        this.notificacoes = response.data || response
-        if (response.pagination) {
-          this.pagination = {
-            page: response.pagination.page || 1,
-            rowsPerPage: response.pagination.limit || 20,
-            rowsNumber: response.pagination.total || 0
+        
+        // A resposta pode ser um array direto ou um objeto com data e pagination
+        if (Array.isArray(response)) {
+          this.notificacoes = response
+        } else if (response?.data && Array.isArray(response.data)) {
+          this.notificacoes = response.data
+          if (response.pagination) {
+            this.pagination = {
+              page: response.pagination.page || 1,
+              rowsPerPage: response.pagination.limit || 20,
+              rowsNumber: response.pagination.total || 0
+            }
           }
+        } else {
+          this.notificacoes = []
         }
+        
         return { success: true }
       } catch (error) {
         console.error('Erro ao buscar notificações:', error)

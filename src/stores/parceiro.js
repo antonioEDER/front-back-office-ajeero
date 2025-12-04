@@ -29,14 +29,23 @@ export const useParceiroStore = defineStore('parceiro', {
       this.loading = true
       try {
         const response = await parceiroService.getParceiros(params)
-        this.parceiros = response.data || response
-        if (response.pagination) {
-          this.pagination = {
-            page: response.pagination.page || 1,
-            rowsPerPage: response.pagination.limit || 20,
-            rowsNumber: response.pagination.total || 0
+        
+        // A resposta pode ser um array direto ou um objeto com data e pagination
+        if (Array.isArray(response)) {
+          this.parceiros = response
+        } else if (response?.data && Array.isArray(response.data)) {
+          this.parceiros = response.data
+          if (response.pagination) {
+            this.pagination = {
+              page: response.pagination.page || 1,
+              rowsPerPage: response.pagination.limit || 20,
+              rowsNumber: response.pagination.total || 0
+            }
           }
+        } else {
+          this.parceiros = []
         }
+        
         return { success: true }
       } catch (error) {
         console.error('Erro ao buscar parceiros:', error)
@@ -132,8 +141,17 @@ export const useParceiroStore = defineStore('parceiro', {
     async fetchBeneficios(parceiroId) {
       this.loading = true
       try {
-        const data = await parceiroService.getBeneficiosByParceiro(parceiroId)
-        this.beneficios = data.data || data
+        const response = await parceiroService.getBeneficiosByParceiro(parceiroId)
+        
+        // A resposta pode ser um array direto ou um objeto com data
+        if (Array.isArray(response)) {
+          this.beneficios = response
+        } else if (response?.data && Array.isArray(response.data)) {
+          this.beneficios = response.data
+        } else {
+          this.beneficios = []
+        }
+        
         return { success: true }
       } catch (error) {
         console.error('Erro ao buscar benefícios:', error)

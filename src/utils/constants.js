@@ -1,5 +1,6 @@
 // Constantes da aplicação
-export const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000/api/v1'
+// Lê da variável de ambiente configurada no quasar.config.js ou usa o valor padrão
+export const API_BASE_URL = import.meta.env.API_BASE_URL || 'http://localhost:3000/api/v1'
 
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'access_token',

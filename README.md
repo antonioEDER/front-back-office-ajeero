@@ -30,13 +30,23 @@ npm install
 
 3. Configure a URL da API:
 
-Crie um arquivo `.env` na raiz do projeto:
+Copie o arquivo de exemplo e configure as variáveis:
+
+```bash
+cp env.example .env
+```
+
+Edite o arquivo `.env` e configure a URL da sua API:
 
 ```env
 API_BASE_URL=http://localhost:3000/api/v1
 ```
 
-Ou configure diretamente em `src/utils/constants.js`
+**Nota:** 
+- O arquivo `.env` não é versionado (está no .gitignore)
+- As variáveis de ambiente são expostas através do `quasar.config.js`
+- O valor padrão é `http://localhost:3000/api/v1`
+- Se preferir, você pode configurar diretamente em `src/utils/constants.js` ou no `quasar.config.js`
 
 ## 🏃 Executar em desenvolvimento
 

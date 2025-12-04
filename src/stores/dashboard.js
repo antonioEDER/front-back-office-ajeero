@@ -24,7 +24,13 @@ export const useDashboardStore = defineStore('dashboard', {
       this.loading = true
       try {
         const data = await dashboardService.getStats()
-        this.stats = data
+        // Se os dados já foram extraídos pelo service, usa diretamente
+        // Se ainda tem a estrutura { success, data }, extrai
+        if (data && typeof data === 'object' && !data.total_associados && data.data) {
+          this.stats = { ...this.stats, ...data.data }
+        } else {
+          this.stats = { ...this.stats, ...data }
+        }
         return { success: true }
       } catch (error) {
         console.error('Erro ao buscar estatísticas:', error)

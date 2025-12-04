@@ -29,14 +29,23 @@ export const useCursoStore = defineStore('curso', {
       this.loading = true
       try {
         const response = await cursoService.getCourses(params)
-        this.courses = response.data || response
-        if (response.pagination) {
-          this.pagination = {
-            page: response.pagination.page || 1,
-            rowsPerPage: response.pagination.limit || 20,
-            rowsNumber: response.pagination.total || 0
+        
+        // A resposta pode ser um array direto ou um objeto com data e pagination
+        if (Array.isArray(response)) {
+          this.courses = response
+        } else if (response?.data && Array.isArray(response.data)) {
+          this.courses = response.data
+          if (response.pagination) {
+            this.pagination = {
+              page: response.pagination.page || 1,
+              rowsPerPage: response.pagination.limit || 20,
+              rowsNumber: response.pagination.total || 0
+            }
           }
+        } else {
+          this.courses = []
         }
+        
         return { success: true }
       } catch (error) {
         console.error('Erro ao buscar cursos:', error)
