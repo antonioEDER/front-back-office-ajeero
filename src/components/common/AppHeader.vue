@@ -12,7 +12,7 @@
 
       <q-toolbar-title class="row items-center q-gutter-sm">
         <q-avatar>
-          <img src="/favicon.ico" alt="AJEERO" />
+          <img src="Logo.jpeg" alt="AJEERO" />
         </q-avatar>
         <span class="text-h6">AJEERO - Backoffice</span>
         <q-separator vertical dark />
