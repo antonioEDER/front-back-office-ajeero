@@ -1,1 +1,451 @@
-// app global css in SCSS form
+// AJEERO Global Styles - Based on Mobile App UI/UX
+// ================================================
+
+// CSS Variables
+:root {
+  // Colors
+  --ajeero-primary: #2563EB;
+  --ajeero-primary-dark: #1E3A8A;
+  --ajeero-secondary: #10B981;
+  --ajeero-accent: #F59E0B;
+  --ajeero-danger: #EF4444;
+  --ajeero-purple: #8B5CF6;
+  --ajeero-pink: #EC4899;
+  
+  // Backgrounds
+  --bg-body: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-gray: #F1F5F9;
+  --bg-dark-header: #1E3A8A;
+  
+  // Text
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  
+  // Borders
+  --border-color: #E2E8F0;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 20px;
+  
+  // Shadows
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+// Global Styles
+body {
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+// =====================
+// CARDS - Estilo AJEERO
+// =====================
+.q-card {
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    box-shadow: var(--shadow-lg) !important;
+    transform: translateY(-2px);
+  }
+}
+
+.q-card__section {
+  padding: 16px;
+}
+
+// Card com ícone colorido (estilo benefícios/cursos)
+.ajeero-icon-card {
+  background: var(--bg-card);
+  border-radius: var(--border-radius-xl);
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  
+  .icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    
+    &.blue { background: var(--ajeero-primary); }
+    &.green { background: var(--ajeero-secondary); }
+    &.orange { background: var(--ajeero-accent); }
+    &.red { background: var(--ajeero-danger); }
+    &.purple { background: var(--ajeero-purple); }
+    &.pink { background: var(--ajeero-pink); }
+  }
+}
+
+// =====================
+// BUTTONS - Estilo AJEERO
+// =====================
+.q-btn {
+  border-radius: var(--border-radius-md) !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  padding: 8px 20px !important;
+  transition: all 0.2s ease !important;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.q-btn--round {
+  border-radius: 50% !important;
+}
+
+.q-btn--fab {
+  border-radius: var(--border-radius-lg) !important;
+}
+
+// Botão primário
+.q-btn.bg-primary {
+  background: linear-gradient(135deg, var(--ajeero-primary) 0%, var(--ajeero-primary-dark) 100%) !important;
+}
+
+// =====================
+// INPUTS - Estilo AJEERO
+// =====================
+.q-field {
+  .q-field__control {
+    border-radius: var(--border-radius-md) !important;
+    background: var(--bg-gray) !important;
+    
+    &:before {
+      border-color: transparent !important;
+    }
+    
+    &:hover:before {
+      border-color: var(--ajeero-primary) !important;
+    }
+  }
+  
+  &.q-field--focused {
+    .q-field__control {
+      background: var(--bg-card) !important;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      
+      &:before {
+        border-color: var(--ajeero-primary) !important;
+      }
+    }
+  }
+}
+
+.q-field--outlined .q-field__control {
+  border-radius: var(--border-radius-md) !important;
+}
+
+// Search bar estilo app
+.ajeero-search {
+  .q-field__control {
+    background: var(--bg-gray) !important;
+    border-radius: var(--border-radius-full) !important;
+    padding: 0 16px;
+  }
+}
+
+// =====================
+// TABLES - Estilo AJEERO
+// =====================
+.q-table {
+  border-radius: var(--border-radius-lg) !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  
+  thead {
+    background: var(--bg-gray);
+    
+    th {
+      font-weight: 600 !important;
+      color: var(--text-primary) !important;
+      border-bottom: 2px solid var(--border-color) !important;
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background: var(--bg-gray) !important;
+      }
+      
+      td {
+        border-bottom: 1px solid var(--border-color) !important;
+      }
+    }
+  }
+}
+
+.q-table__card {
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+// =====================
+// BADGES/CHIPS - Estilo AJEERO
+// =====================
+.q-badge {
+  border-radius: var(--border-radius-full) !important;
+  padding: 4px 12px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+}
+
+.q-chip {
+  border-radius: var(--border-radius-full) !important;
+  font-weight: 500;
+}
+
+// Status badges como no app
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--border-radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  
+  &.status-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--ajeero-secondary);
+  }
+  
+  &.status-inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--ajeero-danger);
+  }
+  
+  &.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--ajeero-accent);
+  }
+}
+
+// Category badges como no app (institucional, eventos)
+.category-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: var(--border-radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  
+  &.cat-institucional { background: var(--ajeero-primary); }
+  &.cat-eventos { background: var(--ajeero-accent); }
+  &.cat-noticias { background: var(--ajeero-secondary); }
+}
+
+// =====================
+// SIDEBAR/MENU - Estilo AJEERO
+// =====================
+.q-drawer {
+  background: var(--bg-card) !important;
+  border-right: 1px solid var(--border-color);
+}
+
+.q-item {
+  border-radius: var(--border-radius-md) !important;
+  margin: 4px 8px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: var(--bg-gray) !important;
+  }
+  
+  &.q-router-link--active {
+    background: rgba(37, 99, 235, 0.1) !important;
+    color: var(--ajeero-primary) !important;
+    
+    .q-icon {
+      color: var(--ajeero-primary) !important;
+    }
+  }
+}
+
+// =====================
+// DIALOGS/MODALS - Estilo AJEERO
+// =====================
+.q-dialog__inner > .q-card {
+  border-radius: var(--border-radius-xl) !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+// =====================
+// TABS - Estilo AJEERO
+// =====================
+.q-tabs {
+  .q-tab {
+    border-radius: var(--border-radius-md);
+    text-transform: none !important;
+    font-weight: 500;
+  }
+}
+
+.q-tab-panels {
+  border-radius: var(--border-radius-lg);
+}
+
+// =====================
+// DATE BADGE - Estilo Eventos
+// =====================
+.date-badge {
+  width: 70px;
+  height: 70px;
+  background: var(--ajeero-primary);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  
+  .day {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  
+  .month {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
+
+// =====================
+// DISCOUNT BADGE - Estilo Benefícios
+// =====================
+.discount-text {
+  color: var(--ajeero-secondary);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+// =====================
+// HEADER - Estilo AJEERO
+// =====================
+.q-header {
+  background: linear-gradient(135deg, var(--ajeero-primary-dark) 0%, var(--ajeero-primary) 100%) !important;
+  
+  .q-toolbar {
+    padding: 8px 16px;
+  }
+}
+
+// =====================
+// NOTIFICATIONS - Estilo AJEERO
+// =====================
+.q-notification {
+  border-radius: var(--border-radius-md) !important;
+}
+
+// =====================
+// PAGINATION - Estilo AJEERO
+// =====================
+.q-pagination {
+  .q-btn {
+    border-radius: var(--border-radius-sm) !important;
+    min-width: 36px;
+    height: 36px;
+  }
+}
+
+// =====================
+// LOADING/SPINNERS
+// =====================
+.q-spinner {
+  color: var(--ajeero-primary) !important;
+}
+
+// =====================
+// UTILITY CLASSES
+// =====================
+.rounded-sm { border-radius: var(--border-radius-sm) !important; }
+.rounded-md { border-radius: var(--border-radius-md) !important; }
+.rounded-lg { border-radius: var(--border-radius-lg) !important; }
+.rounded-xl { border-radius: var(--border-radius-xl) !important; }
+.rounded-full { border-radius: var(--border-radius-full) !important; }
+
+.shadow-sm { box-shadow: var(--shadow-sm) !important; }
+.shadow-md { box-shadow: var(--shadow-md) !important; }
+.shadow-lg { box-shadow: var(--shadow-lg) !important; }
+
+.bg-ajeero-blue { background-color: var(--ajeero-primary) !important; }
+.bg-ajeero-green { background-color: var(--ajeero-secondary) !important; }
+.bg-ajeero-orange { background-color: var(--ajeero-accent) !important; }
+.bg-ajeero-red { background-color: var(--ajeero-danger) !important; }
+.bg-ajeero-purple { background-color: var(--ajeero-purple) !important; }
+.bg-ajeero-pink { background-color: var(--ajeero-pink) !important; }
+
+.text-ajeero-blue { color: var(--ajeero-primary) !important; }
+.text-ajeero-green { color: var(--ajeero-secondary) !important; }
+.text-ajeero-orange { color: var(--ajeero-accent) !important; }
+.text-ajeero-red { color: var(--ajeero-danger) !important; }
+
+// =====================
+// LIST ITEMS - Estilo Eventos/Cursos
+// =====================
+.ajeero-list-item {
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateX(4px);
+  }
+}
+
+// =====================
+// SCROLLBAR CUSTOM
+// =====================
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 4px;
+  
+  &:hover {
+    background: var(--text-secondary);
+  }
+}

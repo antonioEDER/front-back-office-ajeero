@@ -152,8 +152,8 @@
 
           <div class="row q-gutter-md items-center">
             <div class="col-auto">
-              <q-avatar v-if="photoPreview || currentPhoto" size="100px">
-                <img :src="photoPreview || currentPhoto" alt="Preview" />
+              <q-avatar v-if="photoPreview" size="100px">
+                <img :src="isLocalPhoto ? photoPreview : API_BASE_URL + photoPreview" alt="Preview" />
               </q-avatar>
               <q-avatar v-else size="100px" color="grey" text-color="white">
                 <q-icon name="person" size="50px" />
@@ -200,6 +200,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAssociadoStore } from 'src/stores/associado'
 import { validateCPF, validateEmail, validateImageFile } from 'src/utils/validators'
 import { useQuasar } from 'quasar'
+import { API_BASE_URL } from 'src/utils/constants'
 
 const route = useRoute()
 const router = useRouter()
@@ -226,6 +227,7 @@ const form = ref({
 const photoFile = ref(null)
 const photoPreview = ref(null)
 const currentPhoto = ref(null)
+const isLocalPhoto = ref(false)
 const loading = ref(true)
 const saving = ref(false)
 
@@ -286,7 +288,9 @@ const loadAssociado = async () => {
           state: data.address?.state || ''
         }
       }
-      currentPhoto.value = data.photo_url
+      currentPhoto.value = data.photo
+      photoPreview.value = data.photo
+      isLocalPhoto.value = false
     }
   } finally {
     loading.value = false
@@ -300,7 +304,7 @@ const searchCEP = async () => {
   try {
     const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
     const data = await response.json()
-    
+
     if (!data.erro) {
       form.value.address.street = data.logradouro || ''
       form.value.address.neighborhood = data.bairro || ''
@@ -329,10 +333,12 @@ const handlePhotoSelect = (file) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       photoPreview.value = e.target.result
+      isLocalPhoto.value = true
     }
     reader.readAsDataURL(file)
   } else {
-    photoPreview.value = null
+    photoPreview.value = currentPhoto.value
+    isLocalPhoto.value = false
   }
 }
 
