@@ -33,7 +33,7 @@ const routes = [
       // Parceiros
       { path: 'parceiros', component: () => import('pages/parceiros/PartnersListPage.vue') },
       { path: 'parceiros/novo', component: () => import('pages/parceiros/PartnerCreatePage.vue') },
-      { path: 'parceiros/:id', component: () => import('pages/parceiros/PartnerEditPage.vue') },
+      { path: 'parceiros/:id/editar', component: () => import('pages/parceiros/PartnerEditPage.vue') },
       { path: 'parceiros/:id/beneficios', component: () => import('pages/parceiros/BenefitsManagePage.vue') },
       
       // Benefícios
