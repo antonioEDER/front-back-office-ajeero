@@ -30,23 +30,30 @@
 
           <div class="row q-gutter-md">
             <div class="col-12">
-              <q-input
-                v-model="form.imagem_url"
-                label="URL da Imagem"
-                outlined
-                hint="URL da imagem da notícia"
-              />
-            </div>
-          </div>
-
-          <div class="row q-gutter-md" v-if="form.imagem_url">
-            <div class="col-12">
-              <div class="text-body2 q-mb-sm">Preview da Imagem:</div>
-              <q-img
-                :src="form.imagem_url"
-                style="max-width: 400px; max-height: 300px;"
-                fit="contain"
-              />
+              <div class="text-h6 q-mb-md">Imagem da Notícia</div>
+              <div class="row q-gutter-md items-center">
+                <div class="col-auto">
+                  <q-avatar v-if="imagemPreview" size="100px">
+                    <img :src="imagemPreview" alt="Preview Imagem" />
+                  </q-avatar>
+                  <q-avatar v-else size="100px" color="grey" text-color="white">
+                    <q-icon name="image" size="50px" />
+                  </q-avatar>
+                </div>
+                <div class="col">
+                  <q-file
+                    v-model="imagemFile"
+                    label="Selecionar imagem"
+                    accept="image/*"
+                    outlined
+                    @update:model-value="handleImagemSelect"
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="attach_file" />
+                    </template>
+                  </q-file>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -71,8 +78,8 @@
                 <q-card-section>
                   <div class="text-h5 q-mb-md">{{ form.titulo }}</div>
                   <q-img
-                    v-if="form.imagem_url"
-                    :src="form.imagem_url"
+                    v-if="imagemPreview"
+                    :src="imagemPreview"
                     style="max-width: 100%; max-height: 400px;"
                     fit="contain"
                     class="q-mb-md"
@@ -112,16 +119,21 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNoticiaStore } from 'src/stores/noticia'
+import { validateImageFile } from 'src/utils/validators'
+import { useQuasar } from 'quasar'
 
 const router = useRouter()
+const $q = useQuasar()
 const noticiaStore = useNoticiaStore()
 
 const loading = ref(false)
 const form = ref({
   titulo: '',
-  conteudo_html: '',
-  imagem_url: ''
+  conteudo_html: ''
 })
+
+const imagemFile = ref(null)
+const imagemPreview = ref(null)
 
 const editorToolbar = [
   [
@@ -156,6 +168,30 @@ const editorToolbar = [
   ['removeFormat']
 ]
 
+const handleImagemSelect = (file) => {
+  if (file) {
+    const validation = validateImageFile(file)
+    if (!validation.valid) {
+      $q.notify({
+        type: 'negative',
+        message: validation.error,
+        position: 'top'
+      })
+      imagemFile.value = null
+      imagemPreview.value = null
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imagemPreview.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+  } else {
+    imagemPreview.value = null
+  }
+}
+
 const handleSubmit = async () => {
   if (!form.value.conteudo_html) {
     return
@@ -165,6 +201,10 @@ const handleSubmit = async () => {
   try {
     const result = await noticiaStore.create(form.value)
     if (result.success) {
+      // Upload imagem se houver
+      if (imagemFile.value && result.data?.id) {
+        await noticiaStore.uploadImagem(result.data.id, imagemFile.value)
+      }
       router.push('/noticias')
     }
   } finally {

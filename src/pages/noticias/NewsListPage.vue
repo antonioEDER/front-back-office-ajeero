@@ -39,7 +39,7 @@
           <template v-slot:body-cell-imagem_url="props">
             <q-td :props="props">
               <q-avatar v-if="props.row.imagem_url" size="60px" square>
-                <img :src="props.row.imagem_url" :alt="props.row.titulo" />
+                <img :src="API_BASE_URL + props.row.imagem_url" :alt="props.row.titulo" />
               </q-avatar>
               <q-avatar v-else size="60px" square color="grey" text-color="white">
                 <q-icon name="image" />
@@ -98,6 +98,7 @@ import { formatDate } from 'src/utils/formatters'
 import { buildPaginationParams } from 'src/utils/tableHelpers'
 import SearchBar from 'src/components/common/SearchBar.vue'
 import ConfirmDialog from 'src/components/common/ConfirmDialog.vue'
+import { API_BASE_URL } from 'src/utils/constants'
 
 const router = useRouter()
 const noticiaStore = useNoticiaStore()

@@ -134,6 +134,26 @@ export const useNoticiaStore = defineStore('noticia', {
       } finally {
         this.loading = false
       }
+    },
+
+    async uploadImagem(id, file) {
+      try {
+        const response = await noticiaService.uploadImagem(id, file)
+        Notify.create({
+          type: 'positive',
+          message: 'Imagem atualizada com sucesso!',
+          position: 'top'
+        })
+        return { success: true, data: response }
+      } catch (error) {
+        const message = error.response?.data?.message || 'Erro ao fazer upload da imagem'
+        Notify.create({
+          type: 'negative',
+          message,
+          position: 'top'
+        })
+        return { success: false, error: message }
+      }
     }
   }
 })

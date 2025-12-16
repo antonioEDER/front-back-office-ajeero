@@ -36,23 +36,30 @@
 
           <div class="row q-gutter-md">
             <div class="col-12">
-              <q-input
-                v-model="form.imagem_url"
-                label="URL da Imagem"
-                outlined
-                hint="URL da imagem da notícia"
-              />
-            </div>
-          </div>
-
-          <div class="row q-gutter-md" v-if="form.imagem_url">
-            <div class="col-12">
-              <div class="text-body2 q-mb-sm">Preview da Imagem:</div>
-              <q-img
-                :src="form.imagem_url"
-                style="max-width: 400px; max-height: 300px;"
-                fit="contain"
-              />
+              <div class="text-h6 q-mb-md">Imagem da Notícia</div>
+              <div class="row q-gutter-md items-center">
+                <div class="col-auto">
+                  <q-avatar v-if="imagemImageUrl" size="100px">
+                    <img :src="imagemImageUrl" alt="Preview Imagem" />
+                  </q-avatar>
+                  <q-avatar v-else size="100px" color="grey" text-color="white">
+                    <q-icon name="image" size="50px" />
+                  </q-avatar>
+                </div>
+                <div class="col">
+                  <q-file
+                    v-model="imagemFile"
+                    label="Selecionar nova imagem"
+                    accept="image/*"
+                    outlined
+                    @update:model-value="handleImagemSelect"
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="attach_file" />
+                    </template>
+                  </q-file>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -77,8 +84,8 @@
                 <q-card-section>
                   <div class="text-h5 q-mb-md">{{ form.titulo }}</div>
                   <q-img
-                    v-if="form.imagem_url"
-                    :src="form.imagem_url"
+                    v-if="imagemImageUrl"
+                    :src="imagemImageUrl"
                     style="max-width: 100%; max-height: 400px;"
                     fit="contain"
                     class="q-mb-md"
@@ -97,7 +104,7 @@
                 type="submit"
                 color="primary"
                 label="Salvar Alterações"
-                :loading="loading"
+                :loading="saving"
                 icon="save"
               />
               <q-btn
@@ -115,21 +122,42 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNoticiaStore } from 'src/stores/noticia'
+import { validateImageFile } from 'src/utils/validators'
+import { useQuasar } from 'quasar'
+import { API_BASE_URL } from 'src/utils/constants'
 
 const route = useRoute()
 const router = useRouter()
+const $q = useQuasar()
 const noticiaStore = useNoticiaStore()
 
 const noticiaId = route.params.id
 const loading = ref(false)
+const saving = ref(false)
 const noticia = ref(null)
 const form = ref({
   titulo: '',
-  conteudo_html: '',
-  imagem_url: ''
+  conteudo_html: ''
+})
+
+const imagemFile = ref(null)
+const imagemPreview = ref(null)
+const currentImagem = ref(null)
+
+// Computed para URL da imagem: prioriza preview local, senão adiciona API_BASE_URL se vier da lista
+const imagemImageUrl = computed(() => {
+  if (imagemPreview.value) {
+    // Nova seleção local - usar preview
+    return imagemPreview.value
+  }
+  if (currentImagem.value) {
+    // Imagem da lista - adicionar API_BASE_URL
+    return API_BASE_URL + currentImagem.value
+  }
+  return null
 })
 
 const editorToolbar = [
@@ -165,6 +193,30 @@ const editorToolbar = [
   ['removeFormat']
 ]
 
+const handleImagemSelect = (file) => {
+  if (file) {
+    const validation = validateImageFile(file)
+    if (!validation.valid) {
+      $q.notify({
+        type: 'negative',
+        message: validation.error,
+        position: 'top'
+      })
+      imagemFile.value = null
+      imagemPreview.value = null
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imagemPreview.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+  } else {
+    imagemPreview.value = null
+  }
+}
+
 const loadNoticia = async () => {
   loading.value = true
   try {
@@ -173,9 +225,9 @@ const loadNoticia = async () => {
       noticia.value = noticiaStore.currentNoticia
       form.value = {
         titulo: noticia.value.titulo || '',
-        conteudo_html: noticia.value.conteudo_html || '',
-        imagem_url: noticia.value.imagem_url || ''
+        conteudo_html: noticia.value.conteudo_html || ''
       }
+      currentImagem.value = noticia.value.imagem_url || null
     }
   } finally {
     loading.value = false
@@ -187,14 +239,18 @@ const handleSubmit = async () => {
     return
   }
 
-  loading.value = true
+  saving.value = true
   try {
     const result = await noticiaStore.update(noticiaId, form.value)
     if (result.success) {
+      // Upload imagem se houver
+      if (imagemFile.value) {
+        await noticiaStore.uploadImagem(noticiaId, imagemFile.value)
+      }
       router.push('/noticias')
     }
   } finally {
-    loading.value = false
+    saving.value = false
   }
 }
 

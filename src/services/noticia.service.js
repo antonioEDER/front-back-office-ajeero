@@ -25,6 +25,15 @@ export const noticiaService = {
   async deleteNoticia(id) {
     const response = await api.delete(`/admin/noticias/${id}`)
     return extractApiData(response.data)
+  },
+
+  async uploadImagem(id, file) {
+    const formData = new FormData()
+    formData.append('imagem', file)
+    const response = await api.post(`/admin/noticias/${id}/imagem`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return extractApiData(response.data)
   }
 }
 
