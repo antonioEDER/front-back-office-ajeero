@@ -51,8 +51,8 @@
         >
           <template v-slot:body-cell-photo="props">
             <q-td :props="props">
-              <q-avatar v-if="props.row.photo_url" size="40px">
-                <img :src="props.row.photo_url" :alt="props.row.name" />
+              <q-avatar v-if="props.row.photo" size="40px">
+                <img :src="photoUrl + props.row.photo" :alt="props.row.name" />
               </q-avatar>
               <q-avatar v-else size="40px" color="grey" text-color="white">
                 <q-icon name="person" />
@@ -130,6 +130,7 @@ import SearchBar from 'src/components/common/SearchBar.vue'
 import StatusBadge from 'src/components/common/StatusBadge.vue'
 import ConfirmDialog from 'src/components/common/ConfirmDialog.vue'
 import { useQuasar } from 'quasar'
+import { API_BASE_URL } from 'src/utils/constants'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -141,6 +142,8 @@ const search = ref('')
 const statusFilter = ref(null)
 const confirmDialog = ref(false)
 const deleteId = ref(null)
+
+const photoUrl = API_BASE_URL
 
 const statusOptions = [
   { label: 'Ativo', value: 'active' },
@@ -218,7 +221,7 @@ const loadAssociados = async () => {
       search: search.value || undefined,
       status: statusFilter.value || undefined
     })
-    
+
     const result = await associadoStore.fetchAssociados(params)
     if (result.success) {
       associados.value = associadoStore.associados
