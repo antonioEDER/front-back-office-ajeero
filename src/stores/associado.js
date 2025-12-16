@@ -53,7 +53,7 @@ export const useAssociadoStore = defineStore('associado', {
     async fetchById(id) {
       this.loading = true
       try {
-        const data = await associadoService.getAssociadoById(id)
+        const data = await associadoService.getAssociadoByUserId(id)
         this.currentAssociado = data
         return { success: true, data }
       } catch (error) {

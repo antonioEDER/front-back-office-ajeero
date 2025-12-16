@@ -7,8 +7,8 @@ export const associadoService = {
     return extractApiData(response.data)
   },
 
-  async getAssociadoById(id) {
-    const response = await api.get(`/associados/${id}`)
+  async getAssociadoByUserId(userId) {
+    const response = await api.get(`/associados/${userId}`)
     return extractApiData(response.data)
   },
 

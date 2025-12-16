@@ -74,7 +74,7 @@
                 round
                 icon="edit"
                 color="primary"
-                @click="editAssociado(props.row.id)"
+                @click="editAssociado(props.row.user_id)"
                 class="q-mr-xs"
               />
               <q-btn
