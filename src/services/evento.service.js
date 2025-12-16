@@ -30,6 +30,15 @@ export const eventoService = {
   async getInscritos(eventoId, params) {
     const response = await api.get(`/admin/eventos/${eventoId}/inscritos`, { params })
     return extractApiData(response.data)
+  },
+
+  async uploadCapa(id, file) {
+    const formData = new FormData()
+    formData.append('capa', file)
+    const response = await api.post(`/admin/eventos/${id}/capa`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return extractApiData(response.data)
   }
 }
 

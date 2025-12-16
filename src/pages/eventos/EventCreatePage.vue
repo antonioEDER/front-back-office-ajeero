@@ -62,23 +62,30 @@
 
           <div class="row q-gutter-md">
             <div class="col-12">
-              <q-input
-                v-model="form.capa"
-                label="URL da Capa"
-                outlined
-                hint="URL da imagem de capa do evento"
-              />
-            </div>
-          </div>
-
-          <div class="row q-gutter-md" v-if="form.capa">
-            <div class="col-12">
-              <div class="text-body2 q-mb-sm">Preview da Capa:</div>
-              <q-img
-                :src="form.capa"
-                style="max-width: 400px; max-height: 300px;"
-                fit="contain"
-              />
+              <div class="text-h6 q-mb-md">Capa do Evento</div>
+              <div class="row q-gutter-md items-center">
+                <div class="col-auto">
+                  <q-avatar v-if="capaPreview" size="100px">
+                    <img :src="capaPreview" alt="Preview Capa" />
+                  </q-avatar>
+                  <q-avatar v-else size="100px" color="grey" text-color="white">
+                    <q-icon name="image" size="50px" />
+                  </q-avatar>
+                </div>
+                <div class="col">
+                  <q-file
+                    v-model="capaFile"
+                    label="Selecionar capa"
+                    accept="image/*"
+                    outlined
+                    @update:model-value="handleCapaSelect"
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="attach_file" />
+                    </template>
+                  </q-file>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -111,8 +118,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useEventoStore } from 'src/stores/evento'
+import { validateImageFile } from 'src/utils/validators'
+import { useQuasar } from 'quasar'
 
 const router = useRouter()
+const $q = useQuasar()
 const eventoStore = useEventoStore()
 
 const loading = ref(false)
@@ -120,21 +130,51 @@ const form = ref({
   titulo: '',
   descricao: '',
   data: '',
-  local: '',
-  capa: ''
+  local: ''
 })
+
+const capaFile = ref(null)
+const capaPreview = ref(null)
+
+const handleCapaSelect = (file) => {
+  if (file) {
+    const validation = validateImageFile(file)
+    if (!validation.valid) {
+      $q.notify({
+        type: 'negative',
+        message: validation.error,
+        position: 'top'
+      })
+      capaFile.value = null
+      capaPreview.value = null
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      capaPreview.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+  } else {
+    capaPreview.value = null
+  }
+}
 
 const handleSubmit = async () => {
   loading.value = true
   try {
     // Converter data para formato ISO
     const dataISO = form.value.data ? new Date(form.value.data).toISOString() : ''
-    
+
     const result = await eventoStore.create({
       ...form.value,
       data: dataISO
     })
     if (result.success) {
+      // Upload capa se houver
+      if (capaFile.value && result.data?.id) {
+        await eventoStore.uploadCapa(result.data.id, capaFile.value)
+      }
       router.push('/eventos')
     }
   } finally {

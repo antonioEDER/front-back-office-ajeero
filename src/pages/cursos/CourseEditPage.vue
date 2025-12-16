@@ -51,8 +51,8 @@
               <div class="text-h6 q-mb-md">Capa do Curso</div>
               <div class="row q-gutter-md items-center">
                 <div class="col-auto">
-                  <q-avatar v-if="form.capa ? thumbnailUrl + form.capa : currentCapa" size="100px">
-                    <img :src="form.capa ? thumbnailUrl + form.capa : currentCapa" alt="Preview Capa" />
+                  <q-avatar v-if="capaImageUrl" size="100px">
+                    <img :src="capaImageUrl" alt="Preview Capa" />
                   </q-avatar>
                   <q-avatar v-else size="100px" color="grey" text-color="white">
                     <q-icon name="image" size="50px" />
@@ -77,8 +77,8 @@
               <div class="text-h6 q-mb-md">Thumbnail do Curso</div>
               <div class="row q-gutter-md items-center">
                 <div class="col-auto">
-                  <q-avatar v-if="form.thumbnail ? thumbnailUrl + form.thumbnail : currentThumbnail" size="100px">
-                    <img :src="form.thumbnail ? thumbnailUrl + form.thumbnail : currentThumbnail" alt="Preview Thumbnail" />
+                  <q-avatar v-if="thumbnailImageUrl" size="100px">
+                    <img :src="thumbnailImageUrl" alt="Preview Thumbnail" />
                   </q-avatar>
                   <q-avatar v-else size="100px" color="grey" text-color="white">
                     <q-icon name="image" size="50px" />
@@ -135,14 +135,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCursoStore } from 'src/stores/curso'
 import { validateImageFile } from 'src/utils/validators'
 import { useQuasar } from 'quasar'
 import { API_BASE_URL } from 'src/utils/constants'
-
-const thumbnailUrl = API_BASE_URL
 
 const route = useRoute()
 const router = useRouter()
@@ -164,6 +162,32 @@ const currentCapa = ref(null)
 const thumbnailFile = ref(null)
 const thumbnailPreview = ref(null)
 const currentThumbnail = ref(null)
+
+// Computed para URL da capa: prioriza preview local, senão adiciona API_BASE_URL se vier da lista
+const capaImageUrl = computed(() => {
+  if (capaPreview.value) {
+    // Nova seleção local - usar preview
+    return capaPreview.value
+  }
+  if (currentCapa.value) {
+    // Imagem da lista - adicionar API_BASE_URL
+    return API_BASE_URL + currentCapa.value
+  }
+  return null
+})
+
+// Computed para URL do thumbnail: prioriza preview local, senão adiciona API_BASE_URL se vier da lista
+const thumbnailImageUrl = computed(() => {
+  if (thumbnailPreview.value) {
+    // Nova seleção local - usar preview
+    return thumbnailPreview.value
+  }
+  if (currentThumbnail.value) {
+    // Imagem da lista - adicionar API_BASE_URL
+    return API_BASE_URL + currentThumbnail.value
+  }
+  return null
+})
 
 const handleCapaSelect = (file) => {
   if (file) {

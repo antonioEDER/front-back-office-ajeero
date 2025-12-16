@@ -168,6 +168,26 @@ export const useEventoStore = defineStore('evento', {
       } finally {
         this.loading = false
       }
+    },
+
+    async uploadCapa(id, file) {
+      try {
+        const response = await eventoService.uploadCapa(id, file)
+        Notify.create({
+          type: 'positive',
+          message: 'Capa atualizada com sucesso!',
+          position: 'top'
+        })
+        return { success: true, data: response }
+      } catch (error) {
+        const message = error.response?.data?.message || 'Erro ao fazer upload da capa'
+        Notify.create({
+          type: 'negative',
+          message,
+          position: 'top'
+        })
+        return { success: false, error: message }
+      }
     }
   }
 })

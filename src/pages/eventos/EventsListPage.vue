@@ -50,7 +50,7 @@
           <template v-slot:body-cell-capa="props">
             <q-td :props="props">
               <q-avatar v-if="props.row.capa" size="60px" square>
-                <img :src="props.row.capa" :alt="props.row.titulo" />
+                <img :src="capaUrl + props.row.capa" :alt="props.row.titulo" />
               </q-avatar>
               <q-avatar v-else size="60px" square color="grey" text-color="white">
                 <q-icon name="image" />
@@ -124,6 +124,9 @@ import { formatDate, formatDateTime } from 'src/utils/formatters'
 import { buildPaginationParams } from 'src/utils/tableHelpers'
 import SearchBar from 'src/components/common/SearchBar.vue'
 import ConfirmDialog from 'src/components/common/ConfirmDialog.vue'
+import { API_BASE_URL } from 'src/utils/constants'
+
+const capaUrl = API_BASE_URL
 
 const router = useRouter()
 const eventoStore = useEventoStore()
