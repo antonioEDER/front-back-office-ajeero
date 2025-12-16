@@ -144,17 +144,12 @@ const handleLogoSelect = (file) => {
 const handleSubmit = async () => {
   loading.value = true
   try {
-    const dataToSend = {
-      ...form.value
-    }
-
-    // Se há logo selecionado, incluir como base64 ou URL
-    if (logoPreview.value) {
-      dataToSend.logo = logoPreview.value
-    }
-
-    const result = await parceiroStore.create(dataToSend)
+    const result = await parceiroStore.create(form.value)
     if (result.success) {
+      // Upload logo se houver
+      if (logoFile.value && result.data?.id) {
+        await parceiroStore.uploadLogo(result.data.id, logoFile.value)
+      }
       router.push('/parceiros')
     }
   } finally {

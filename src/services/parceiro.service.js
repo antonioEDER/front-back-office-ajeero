@@ -55,6 +55,15 @@ export const parceiroService = {
   async deleteBeneficio(id) {
     const response = await api.delete(`/admin/beneficios/${id}`)
     return extractApiData(response.data)
+  },
+
+  async uploadLogo(id, file) {
+    const formData = new FormData()
+    formData.append('logo', file)
+    const response = await api.post(`/admin/parceiros/${id}/logo`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return extractApiData(response.data)
   }
 }
 

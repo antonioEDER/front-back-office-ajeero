@@ -201,17 +201,12 @@ const loadParceiro = async () => {
 const handleSubmit = async () => {
   saving.value = true
   try {
-    const dataToSend = {
-      ...form.value
-    }
-
-    // Se há nova logo selecionada, incluir como base64
-    if (logoPreview.value) {
-      dataToSend.logo = logoPreview.value
-    }
-
-    const result = await parceiroStore.update(parceiroId, dataToSend)
+    const result = await parceiroStore.update(parceiroId, form.value)
     if (result.success) {
+      // Upload logo se houver novo arquivo
+      if (logoFile.value) {
+        await parceiroStore.uploadLogo(parceiroId, logoFile.value)
+      }
       router.push('/parceiros')
     }
   } finally {

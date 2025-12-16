@@ -228,6 +228,26 @@ export const useParceiroStore = defineStore('parceiro', {
       } finally {
         this.loading = false
       }
+    },
+
+    async uploadLogo(id, file) {
+      try {
+        const response = await parceiroService.uploadLogo(id, file)
+        Notify.create({
+          type: 'positive',
+          message: 'Logo atualizada com sucesso!',
+          position: 'top'
+        })
+        return { success: true, data: response }
+      } catch (error) {
+        const message = error.response?.data?.message || 'Erro ao fazer upload da logo'
+        Notify.create({
+          type: 'negative',
+          message,
+          position: 'top'
+        })
+        return { success: false, error: message }
+      }
     }
   }
 })
