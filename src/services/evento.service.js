@@ -3,12 +3,12 @@ import { extractApiData } from 'src/utils/apiHelpers'
 
 export const eventoService = {
   async getEventos(params) {
-    const response = await api.get('/eventos', { params })
+    const response = await api.get('/admin/eventos', { params })
     return extractApiData(response.data)
   },
 
   async getEventoById(id) {
-    const response = await api.get(`/eventos/${id}`)
+    const response = await api.get(`/admin/eventos/${id}`)
     return extractApiData(response.data)
   },
 

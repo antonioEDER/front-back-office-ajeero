@@ -3,12 +3,12 @@ import { extractApiData } from 'src/utils/apiHelpers'
 
 export const cursoService = {
   async getCourses(params) {
-    const response = await api.get('/courses', { params })
+    const response = await api.get('/admin/courses', { params })
     return extractApiData(response.data)
   },
 
   async getCourseById(id) {
-    const response = await api.get(`/courses/${id}`)
+    const response = await api.get(`/admin/courses/${id}`)
     return extractApiData(response.data)
   },
 
@@ -39,6 +39,24 @@ export const cursoService = {
 
   async deleteLesson(id) {
     const response = await api.delete(`/admin/courses/lessons/${id}`)
+    return extractApiData(response.data)
+  },
+
+  async uploadCapa(id, file) {
+    const formData = new FormData()
+    formData.append('capa', file)
+    const response = await api.post(`/admin/courses/${id}/capa`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return extractApiData(response.data)
+  },
+
+  async uploadThumbnail(id, file) {
+    const formData = new FormData()
+    formData.append('thumbnail', file)
+    const response = await api.post(`/admin/courses/${id}/thumbnail`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
     return extractApiData(response.data)
   }
 }

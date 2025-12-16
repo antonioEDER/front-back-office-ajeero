@@ -2,15 +2,15 @@
   <q-page padding>
     <div class="row q-mb-md items-center">
       <div class="col">
-        <div class="text-h4">Eventos</div>
-        <div class="text-subtitle1 text-grey-7">Gerenciar eventos do sistema</div>
+        <div class="text-h4">Benefícios</div>
+        <div class="text-subtitle1 text-grey-7">Gerenciar benefícios de parceiros</div>
       </div>
       <div class="col-auto">
         <q-btn
           color="primary"
           icon="add"
-          label="Novo Evento"
-          @click="$router.push('/eventos/novo')"
+          label="Novo Benefício"
+          @click="$router.push('/beneficios/novo')"
         />
       </div>
     </div>
@@ -21,25 +21,41 @@
           <div class="col-12 col-sm-6 col-md-4">
             <SearchBar
               v-model="search"
-              placeholder="Buscar por título ou local..."
+              placeholder="Buscar por título..."
               @search="handleSearch"
             />
           </div>
           <div class="col-12 col-sm-6 col-md-3">
-            <q-input
-              v-model="dataFilter"
-              label="Filtrar por data"
-              type="date"
+            <q-select
+              v-model="parceiroFilter"
+              :options="parceiroOptions"
+              label="Filtrar por parceiro"
               outlined
               dense
               clearable
-              @update:model-value="loadEventos"
+              emit-value
+              map-options
+              @update:model-value="loadBeneficios"
+              :loading="loadingParceiros"
+            />
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-select
+              v-model="tipoFilter"
+              :options="tipoOptions"
+              label="Filtrar por tipo"
+              outlined
+              dense
+              clearable
+              emit-value
+              map-options
+              @update:model-value="loadBeneficios"
             />
           </div>
         </div>
 
         <q-table
-          :rows="eventos"
+          :rows="beneficios"
           :columns="columns"
           :loading="loading"
           :pagination="pagination"
@@ -47,23 +63,6 @@
           @request="onRequest"
           :rows-per-page-options="[10, 20, 50, 100]"
         >
-          <template v-slot:body-cell-capa="props">
-            <q-td :props="props">
-              <q-avatar v-if="props.row.capa" size="60px" square>
-                <img :src="props.row.capa" :alt="props.row.titulo" />
-              </q-avatar>
-              <q-avatar v-else size="60px" square color="grey" text-color="white">
-                <q-icon name="image" />
-              </q-avatar>
-            </q-td>
-          </template>
-
-          <template v-slot:body-cell-data="props">
-            <q-td :props="props">
-              {{ formatDateTime(props.row.data) }}
-            </q-td>
-          </template>
-
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
               <q-btn
@@ -72,7 +71,7 @@
                 round
                 icon="visibility"
                 color="primary"
-                @click="viewEvento(props.row.id)"
+                @click="viewBeneficio(props.row.id)"
                 class="q-mr-xs"
               />
               <q-btn
@@ -81,16 +80,7 @@
                 round
                 icon="edit"
                 color="primary"
-                @click="editEvento(props.row.id)"
-                class="q-mr-xs"
-              />
-              <q-btn
-                flat
-                dense
-                round
-                icon="people"
-                color="info"
-                @click="viewInscritos(props.row.id)"
+                @click="editBeneficio(props.row.id)"
                 class="q-mr-xs"
               />
               <q-btn
@@ -99,7 +89,7 @@
                 round
                 icon="delete"
                 color="negative"
-                @click="deleteEvento(props.row.id)"
+                @click="deleteBeneficio(props.row.id)"
               />
             </q-td>
           </template>
@@ -110,7 +100,7 @@
     <ConfirmDialog
       v-model="confirmDialog"
       title="Confirmar exclusão"
-      message="Tem certeza que deseja remover este evento? Esta ação não pode ser desfeita."
+      message="Tem certeza que deseja remover este benefício? Esta ação não pode ser desfeita."
       @confirm="confirmDelete"
     />
   </q-page>
@@ -119,29 +109,34 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useEventoStore } from 'src/stores/evento'
-import { formatDate, formatDateTime } from 'src/utils/formatters'
+import { useBeneficioStore } from 'src/stores/beneficio'
+import { useParceiroStore } from 'src/stores/parceiro'
+import { formatDate, truncate } from 'src/utils/formatters'
 import { buildPaginationParams } from 'src/utils/tableHelpers'
 import SearchBar from 'src/components/common/SearchBar.vue'
 import ConfirmDialog from 'src/components/common/ConfirmDialog.vue'
+import { BENEFICIO_TYPES } from 'src/utils/constants'
 
 const router = useRouter()
-const eventoStore = useEventoStore()
+const beneficioStore = useBeneficioStore()
+const parceiroStore = useParceiroStore()
 
-const eventos = ref([])
+const beneficios = ref([])
 const loading = ref(false)
+const loadingParceiros = ref(false)
 const search = ref('')
-const dataFilter = ref(null)
+const parceiroFilter = ref(null)
+const tipoFilter = ref(null)
 const confirmDialog = ref(false)
 const deleteId = ref(null)
+const parceiroOptions = ref([])
+
+const tipoOptions = Object.values(BENEFICIO_TYPES).map(tipo => ({
+  label: tipo,
+  value: tipo
+}))
 
 const columns = [
-  {
-    name: 'capa',
-    label: 'Capa',
-    field: 'capa',
-    align: 'left'
-  },
   {
     name: 'titulo',
     label: 'Título',
@@ -150,23 +145,23 @@ const columns = [
     sortable: true
   },
   {
-    name: 'data',
-    label: 'Data',
-    field: 'data',
-    align: 'left',
-    sortable: true
-  },
-  {
-    name: 'local',
-    label: 'Local',
-    field: 'local',
+    name: 'parceiro_nome',
+    label: 'Parceiro',
+    field: 'parceiro_nome',
     align: 'left'
   },
   {
-    name: 'total_inscritos',
-    label: 'Inscritos',
-    field: 'total_inscritos',
-    align: 'center'
+    name: 'tipo',
+    label: 'Tipo',
+    field: 'tipo',
+    align: 'left'
+  },
+  {
+    name: 'descricao',
+    label: 'Descrição',
+    field: 'descricao',
+    align: 'left',
+    format: (val) => truncate(val || '', 50)
   },
   {
     name: 'created_at',
@@ -188,22 +183,38 @@ const pagination = ref({
   page: 1,
   rowsPerPage: 20,
   rowsNumber: 0,
-  sortBy: 'data',
-  descending: false
+  sortBy: 'created_at',
+  descending: true
 })
 
-const loadEventos = async () => {
+const loadParceiros = async () => {
+  loadingParceiros.value = true
+  try {
+    const result = await parceiroStore.fetchParceiros({ limit: 1000 })
+    if (result.success) {
+      parceiroOptions.value = parceiroStore.parceiros.map(p => ({
+        label: p.nome,
+        value: p.id
+      }))
+    }
+  } finally {
+    loadingParceiros.value = false
+  }
+}
+
+const loadBeneficios = async () => {
   loading.value = true
   try {
     const params = buildPaginationParams(pagination.value, {
       search: search.value || undefined,
-      data: dataFilter.value || undefined
+      parceiro_id: parceiroFilter.value || undefined,
+      tipo: tipoFilter.value || undefined
     })
 
-    const result = await eventoStore.fetchEventos(params)
+    const result = await beneficioStore.fetchBeneficios(params)
     if (result.success) {
-      eventos.value = eventoStore.eventos
-      pagination.value.rowsNumber = eventoStore.pagination.rowsNumber
+      beneficios.value = beneficioStore.beneficios
+      pagination.value.rowsNumber = beneficioStore.pagination.rowsNumber
     }
   } finally {
     loading.value = false
@@ -212,42 +223,40 @@ const loadEventos = async () => {
 
 const onRequest = (props) => {
   pagination.value = props.pagination
-  loadEventos()
+  loadBeneficios()
 }
 
 const handleSearch = () => {
   pagination.value.page = 1
-  loadEventos()
+  loadBeneficios()
 }
 
-const viewEvento = (id) => {
-  router.push(`/eventos/${id}`)
+const viewBeneficio = (id) => {
+  router.push(`/beneficios/${id}`)
 }
 
-const editEvento = (id) => {
-  router.push(`/eventos/${id}`)
+const editBeneficio = (id) => {
+  router.push(`/beneficios/${id}`)
 }
 
-const viewInscritos = (id) => {
-  router.push(`/eventos/${id}/inscritos`)
-}
-
-const deleteEvento = (id) => {
+const deleteBeneficio = (id) => {
   deleteId.value = id
   confirmDialog.value = true
 }
 
 const confirmDelete = async () => {
   if (deleteId.value) {
-    const result = await eventoStore.delete(deleteId.value)
+    const result = await beneficioStore.delete(deleteId.value)
     if (result.success) {
-      loadEventos()
+      loadBeneficios()
     }
     deleteId.value = null
   }
 }
 
 onMounted(() => {
-  loadEventos()
+  loadParceiros()
+  loadBeneficios()
 })
 </script>
+

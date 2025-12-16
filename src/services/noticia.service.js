@@ -3,12 +3,12 @@ import { extractApiData } from 'src/utils/apiHelpers'
 
 export const noticiaService = {
   async getNoticias(params) {
-    const response = await api.get('/noticias', { params })
+    const response = await api.get('/admin/noticias', { params })
     return extractApiData(response.data)
   },
 
   async getNoticiaById(id) {
-    const response = await api.get(`/noticias/${id}`)
+    const response = await api.get(`/admin/noticias/${id}`)
     return extractApiData(response.data)
   },
 

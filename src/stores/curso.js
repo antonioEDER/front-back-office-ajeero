@@ -205,6 +205,52 @@ export const useCursoStore = defineStore('curso', {
       } finally {
         this.loading = false
       }
+    },
+
+    async uploadCapa(id, file) {
+      this.loading = true
+      try {
+        const response = await cursoService.uploadCapa(id, file)
+        Notify.create({
+          type: 'positive',
+          message: 'Capa atualizada com sucesso!',
+          position: 'top'
+        })
+        return { success: true, data: response }
+      } catch (error) {
+        const message = error.response?.data?.message || 'Erro ao fazer upload da capa'
+        Notify.create({
+          type: 'negative',
+          message,
+          position: 'top'
+        })
+        return { success: false, error: message }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async uploadThumbnail(id, file) {
+      this.loading = true
+      try {
+        const response = await cursoService.uploadThumbnail(id, file)
+        Notify.create({
+          type: 'positive',
+          message: 'Thumbnail atualizado com sucesso!',
+          position: 'top'
+        })
+        return { success: true, data: response }
+      } catch (error) {
+        const message = error.response?.data?.message || 'Erro ao fazer upload do thumbnail'
+        Notify.create({
+          type: 'negative',
+          message,
+          position: 'top'
+        })
+        return { success: false, error: message }
+      } finally {
+        this.loading = false
+      }
     }
   }
 })

@@ -36,6 +36,11 @@ const routes = [
       { path: 'parceiros/:id', component: () => import('pages/parceiros/PartnerEditPage.vue') },
       { path: 'parceiros/:id/beneficios', component: () => import('pages/parceiros/BenefitsManagePage.vue') },
       
+      // Benefícios
+      { path: 'beneficios', component: () => import('pages/beneficios/BeneficiosListPage.vue') },
+      { path: 'beneficios/novo', component: () => import('pages/beneficios/BeneficioCreatePage.vue') },
+      { path: 'beneficios/:id', component: () => import('pages/beneficios/BeneficioEditPage.vue') },
+      
       // Notícias
       { path: 'noticias', component: () => import('pages/noticias/NewsListPage.vue') },
       { path: 'noticias/novo', component: () => import('pages/noticias/NewsCreatePage.vue') },
